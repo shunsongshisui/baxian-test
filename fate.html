@@ -367,18 +367,18 @@ const FATES = [
   { icon: '☯', text: '命运之轮开始转动。<br>你的故事，<br>从来都不止一个答案。<br>让天意做最后的决定。' }
 ];
 
-// 每个天命对应的偏爱角色（权重偏置）
+// 每个天命对应的偏爱角色（权重偏置）— 所有角色都有机会，但不同题目略有倾向
 const FATE_BIAS = [
-  { zhongliquan: 1.8, tieguaili: 1.6, zhangguolao: 1.4 },
-  { change: 2.0, lyudongbin: 1.6, lancaihe: 1.4 },
-  { sunwukong: 2.0, hexiangu: 1.6, yangjian: 1.4 },
-  { zhongliquan: 1.6, tieguaili: 1.6, caoguojiu: 1.4, lancaihe: 1.4 },
-  { lyudongbin: 1.6, hanxiangzi: 1.6, sunwukong: 1.4, change: 1.4 },
-  { yangjian: 1.6, zhangguolao: 1.6, hexiangu: 1.4, lancaihe: 1.4 }
+  { zhongliquan: 2.0, tieguaili: 1.8, lancaihe: 1.6, zhangguolao: 1.4, caoguojiu: 1.2, lyudongbin: 1.0, hexiangu: 1.0, hanxiangzi: 1.0, yangjian: 0.8, sunwukong: 0.8 },
+  { yangjian: 1.8, lyudongbin: 1.6, hanxiangzi: 1.6, sunwukong: 1.4, hexiangu: 1.2, caoguojiu: 1.0, lancaihe: 1.0, zhongliquan: 0.8, tieguaili: 0.8, zhangguolao: 0.8 },
+  { sunwukong: 2.0, hexiangu: 1.8, yangjian: 1.6, lyudongbin: 1.2, lancaihe: 1.2, zhongliquan: 1.0, tieguaili: 1.0, caoguojiu: 0.8, hanxiangzi: 0.8, zhangguolao: 0.6 },
+  { tieguaili: 1.8, zhongliquan: 1.6, caoguojiu: 1.6, lancaihe: 1.4, zhangguolao: 1.4, hexiangu: 1.0, lyudongbin: 0.8, sunwukong: 0.8, hanxiangzi: 0.6, yangjian: 0.6 },
+  { lyudongbin: 1.8, hanxiangzi: 1.8, sunwukong: 1.6, lancaihe: 1.4, zhangguolao: 1.2, yangjian: 1.0, hexiangu: 0.8, caoguojiu: 0.8, zhongliquan: 0.6, tieguaili: 0.6 },
+  { yangjian: 2.0, zhangguolao: 1.6, hexiangu: 1.6, caoguojiu: 1.4, lyudongbin: 1.2, hanxiangzi: 1.0, tieguaili: 0.8, zhongliquan: 0.6, lancaihe: 0.6, sunwukong: 0.6 }
 ];
 
 let step = 0;
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 10;
 let fateScores = {};
 
 function init() {
@@ -428,12 +428,12 @@ function drawFate() {
   btn.disabled = true;
   btn.textContent = '☯ 命 运 回 响 …';
 
-  // 加权随机
+  // 加权随机 — 大幅增加随机扰动，让每次结果都不同
   const bias = FATE_BIAS[step] || {};
   const weights = CHARACTERS.map(ch => {
     const w = bias[ch.id] || 1.0;
-    // 加一点随机扰动
-    return { id: ch.id, w: w * (0.5 + Math.random()) };
+    // 强随机扰动：0 ~ 3.0 倍
+    return { id: ch.id, w: w * (Math.random() * 3.0) };
   });
 
   const totalW = weights.reduce((s, x) => s + x.w, 0);
@@ -444,7 +444,8 @@ function drawFate() {
     if (r <= 0) { chosen = id; break; }
   }
 
-  fateScores[chosen] += 10 + Math.floor(Math.random() * 10);
+  // 每轮分差更大：5~25 分
+  fateScores[chosen] += 5 + Math.floor(Math.random() * 21);
 
   const ch = CHARACTERS.find(c => c.id === chosen);
 
@@ -460,7 +461,7 @@ function drawFate() {
     <div class="reveal-sub">${lines[Math.floor(Math.random() * lines.length)]}</div>
     <div class="reveal-char">${ch.icon} ${ch.name}</div>
     <div class="reveal-line">${ch.title}</div>
-    <div class="reveal-sub">+${10 + Math.floor(Math.random() * 10)} 天命之力</div>
+    <div class="reveal-sub">天命之力 +${5 + Math.floor(Math.random() * 21)}</div>
   `;
   setTimeout(() => reveal.classList.add('show'), 100);
 
